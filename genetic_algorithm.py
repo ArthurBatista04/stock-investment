@@ -1,30 +1,34 @@
 import csv
-
-quant = 10
-interval = 15
+import numpy as np
 
 def pre_process():
 	with open('renner.csv', mode='r') as csv_file:
-		variance = [0 for i in range(15)]
 		csv_reader = csv.DictReader(csv_file)
-		
-		count2014 = 0
-		count2015 = 0
-		count = 0
+		interval = []
 		for (index, data) in enumerate(csv_reader):
-			if(data['Data/Hora'].endswith('2014')):
-				count2014 += float(data['Variação'].replace(',', '.'))
-			if(data['Data/Hora'].endswith('2015')):
-				count2015 += float(data['Variação'].replace(',', '.'))
-			if(index % 15 == 0):
-				variance[count] = data['Variação'].replace(',', '.')
-				count+=1
-		print(count2014/247)
-		print(count2015/247)
+			year = data['Data/Hora'][-4:]
+			if(year == '2014' or year == '2015'):
+				interval.append(float(data['Variação'].replace(',','.')))
+		return variance_38d_6m_1y(interval)
 
+def variance_38d_6m_1y(interval):
+	days_38 = np.array_split(interval, 38) # [[1,2,... 38], [] ... 13]
+	months_6 = np.array_split(interval, 123)
+	year_1 = np.array_split(interval, 247)
+	var_38 = []
+	var_6 = []
+	var_1 = []
+	for interval in days_38:
+		var_38.append(np.var(interval))
+	for interval in months_6:
+		var_6.append(np.var(interval))
+	for interval in year_1:
+		var_1.append(np.var(interval))
+	return np.mean(var_38) * 3 + np.mean(var_6) * 2 + np.mean(var_1)
 
 def main():
-	pre_process()
+	print(pre_process())# [0.3,0.2,0.1] A B C => variação 38 * 3 + variação 6 meses * 2 + variação 1 ano * 3
+	
 
 
 if __name__ == "__main__":
