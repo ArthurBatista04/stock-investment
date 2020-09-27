@@ -2,6 +2,7 @@ class Bank(object):
     def __init__(self, safe_box):
         self.number_of_shares = 0
         self.safe_box = safe_box
+        self.initial_value = safe_box
 
     def purchase(self, porcentage, value_per_share):
         if(self.safe_box > 0 and self.safe_box >= value_per_share):
