@@ -48,7 +48,6 @@ def variance_38d_6m_1y(interval):
 
 def simulator_setup(number_of_companies, initial_distribution, amount_to_invest):
     banks = []
-    count = 0
     if(sum(initial_distribution) > 1):
         difference = sum(initial_distribution) - 1
         index = initial_distribution.index(max(initial_distribution))
@@ -60,8 +59,6 @@ def simulator_setup(number_of_companies, initial_distribution, amount_to_invest)
     for i in range(number_of_companies):
         banks.append(Bank(amount_to_invest *
                           initial_distribution[i]))
-        count += initial_distribution[i]
-    print(count)
     return banks
 
 
@@ -71,13 +68,13 @@ def print_banks(companies, banks):
     for index in range(len(banks)):
         initial_value += banks[index].initial_value
         final_value += banks[index].safe_box
-        print(companies[index])
         print(
-            f"initial_value: {banks[index].initial_value} | safe: {banks[index].safe_box} | result: {banks[index].safe_box - banks[index].initial_value} ")
-        print('=================================')
+            f"share: {companies[index][:-4]} initial_value: {banks[index].initial_value} | safe: {banks[index].safe_box} | result: {banks[index].safe_box - banks[index].initial_value} | percentage: {int(calculate_percentage_of_bank(banks[index].initial_value, banks[index].safe_box))}% ")
+        print('========================================================================================================================')
 
-    print(f"valor inicial: {initial_value}")
-    print(f"valor final: {final_value}")
+    print(
+        f"Initial value: {initial_value} | Final value: {final_value} | Percentage: {int(calculate_percentage_of_bank(initial_value, final_value))}%")
+    print('========================================================================================================================')
 
 
 def simple_moving_avarage(company_prices, current_day):
@@ -130,6 +127,35 @@ def indicator(company_prices, current_day):
         return ('no_operation', 0)
 
 
+def print_highest_profit(banks, companies):
+    profits = []
+    for bank in banks:
+        profits.append(bank.safe_box - bank.initial_value)
+    highest_profit = banks[profits.index(max(profits))]
+    share_name = companies[profits.index(max(profits))]
+    percentage = calculate_percentage_of_bank(
+        highest_profit.initial_value, highest_profit.safe_box)
+    print(
+        f"Higher profit was from {share_name[:-4]} share with profit of {int(percentage)}%")
+
+
+def print_lowest_profit(banks, companies):
+    profits = []
+    for bank in banks:
+        profits.append(bank.safe_box - bank.initial_value)
+    lowest_profit = banks[profits.index(min(profits))]
+    share_name = companies[profits.index(min(profits))]
+    percentage = calculate_percentage_of_bank(
+        lowest_profit.initial_value, lowest_profit.safe_box)
+    print(
+        f"Lower profit was from {share_name[:-4]} share with profit of {int(percentage)}%")
+
+
+def calculate_percentage_of_bank(initial_value, final_value):
+    return ((final_value - initial_value) /
+            initial_value) * 100
+
+
 def main():
     companies, variance, companies_prices_2016 = pre_process()
     weakest, _ = genetic_algorithm(1000, variance)
@@ -148,7 +174,11 @@ def main():
     for index in range(len(companies)):
         banks[index].sell(1, companies_prices_2016[index][-1])
 
-    # print_banks(companies, banks)
+    print_banks(companies, banks)
+
+    print_highest_profit(banks, companies)
+
+    print_lowest_profit(banks, companies)
 
 
 if __name__ == "__main__":
