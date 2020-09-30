@@ -48,14 +48,20 @@ def variance_38d_6m_1y(interval):
 
 def simulator_setup(number_of_companies, initial_distribution, amount_to_invest):
     banks = []
-    if(sum(initial_distribution) > 1):
-        difference = sum(initial_distribution) - 1
-        index = initial_distribution.index(max(initial_distribution))
-        initial_distribution[index] += difference
-    elif(sum(initial_distribution) < 1):
-        difference = 1 - sum(initial_distribution)
-        index = initial_distribution.index(max(initial_distribution))
-        initial_distribution[index] += difference
+    print(initial_distribution)
+    t = sum(initial_distribution)
+    for i, j in enumerate(initial_distribution):
+        initial_distribution[i] = j / t
+    print(sum(initial_distribution))
+    print(initial_distribution)
+    # if(sum(initial_distribution) > 1):
+    #     difference = sum(initial_distribution) - 1
+    #     index = initial_distribution.index(max(initial_distribution))
+    #     initial_distribution[index] -= difference
+    # elif(sum(initial_distribution) < 1):
+    #     difference = 1 - sum(initial_distribution)
+    #     index = initial_distribution.index(max(initial_distribution))
+    #     initial_distribution[index] += difference
     for i in range(number_of_companies):
         banks.append(Bank(amount_to_invest *
                           initial_distribution[i]))
@@ -69,11 +75,11 @@ def print_banks(companies, banks):
         initial_value += banks[index].initial_value
         final_value += banks[index].safe_box
         print(
-            f"share: {companies[index][:-4]} initial_value: {banks[index].initial_value} | safe: {banks[index].safe_box} | result: {banks[index].safe_box - banks[index].initial_value} | percentage: {int(calculate_percentage_of_bank(banks[index].initial_value, banks[index].safe_box))}% ")
+            f"share: {companies[index][:-4]} initial_value: {banks[index].initial_value} | safe: {banks[index].safe_box} | result: {banks[index].safe_box - banks[index].initial_value} | percentage: {int(calculate_percentage(banks[index].initial_value, banks[index].safe_box))}% ")
         print('========================================================================================================================')
 
     print(
-        f"Initial value: {initial_value} | Final value: {final_value} | Percentage: {int(calculate_percentage_of_bank(initial_value, final_value))}%")
+        f"Initial value: {initial_value} | Final value: {final_value} | Percentage: {int(calculate_percentage(initial_value, final_value))}%")
     print('========================================================================================================================')
 
 
@@ -98,29 +104,29 @@ def relative_strength_index(company_prices, current_day):
 
         return loss / indicators_interval if loss / indicators_interval > 0 else 1
 
-    return 100 - (1 + (price_gain() / price_loss()))
+    return 100 - (100 / (1 + (price_gain() / price_loss())))
 
 
 def indicator(company_prices, current_day):
     sma = simple_moving_avarage(company_prices, current_day)
     rsi = relative_strength_index(company_prices, current_day)
-    if(company_prices[current_day] > sma):  # primeiro indicador de venda
-        if(rsi >= 70 and rsi < 80):  # confirmação de venda
-            return ('purchase', 1/3)
+    if(company_prices[current_day] < sma):
+        if(rsi >= 70 and rsi < 80):
+            return ('sell', 1/3)
         elif(rsi >= 80 and rsi < 90):
-            return ('purchase', 2/3)
+            return ('sell', 2/3)
         elif(rsi >= 90 and rsi <= 100):
-            return ('purchase', 1)
+            return ('sell', 1)
         else:
             return ('no_operation', 0)
 
-    elif(company_prices[current_day] > sma):  # primeiro indicador de compra
-        if(rsi <= 30 and rsi > 20):  # confirmação de compra
-            return ('sell', 1/3)
+    elif(company_prices[current_day] > sma):
+        if(rsi <= 30 and rsi > 20):
+            return ('purchase', 1/3)
         elif(rsi <= 20 and rsi > 10):
-            return ('sell', 2/3)
+            return ('purchase', 2/3)
         elif(rsi <= 10 and rsi >= 0):
-            return ('sell', 1)
+            return ('purchase', 1)
         else:
             return ('no_operation', 0)
     else:
@@ -133,7 +139,7 @@ def print_highest_profit(banks, companies):
         profits.append(bank.safe_box - bank.initial_value)
     highest_profit = banks[profits.index(max(profits))]
     share_name = companies[profits.index(max(profits))]
-    percentage = calculate_percentage_of_bank(
+    percentage = calculate_percentage(
         highest_profit.initial_value, highest_profit.safe_box)
     print(
         f"Higher profit was from {share_name[:-4]} share with profit of {int(percentage)}%")
@@ -145,22 +151,22 @@ def print_lowest_profit(banks, companies):
         profits.append(bank.safe_box - bank.initial_value)
     lowest_profit = banks[profits.index(min(profits))]
     share_name = companies[profits.index(min(profits))]
-    percentage = calculate_percentage_of_bank(
+    percentage = calculate_percentage(
         lowest_profit.initial_value, lowest_profit.safe_box)
     print(
         f"Lower profit was from {share_name[:-4]} share with profit of {int(percentage)}%")
 
 
-def calculate_percentage_of_bank(initial_value, final_value):
+def calculate_percentage(initial_value, final_value):
     return ((final_value - initial_value) /
             initial_value) * 100
 
 
 def main():
     companies, variance, companies_prices_2016 = pre_process()
-    weakest, _ = genetic_algorithm(1000, variance)
+    _, strongest = genetic_algorithm(1000, variance)
 
-    banks = simulator_setup(len(companies), weakest.gene, 100000)
+    banks = simulator_setup(len(companies), strongest.gene, 100000)
 
     for index in range(len(companies)):
         company_prices = companies_prices_2016[index]

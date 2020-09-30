@@ -90,14 +90,21 @@ def get_strongest_individual_index(population):
 def include_in_population(individuo, population):
     weakest_index = get_weakest_individual_index(population)
     weakest = population[weakest_index]
-    return individuo.fitness < weakest.fitness
+    return individuo.fitness > weakest.fitness
+
+
+def normalize_indicators(indicators):
+    total = sum(indicators)
+    for i, indicator in enumerate(indicators):
+        indicators[i] = 1 - indicator / total
 
 
 def genetic_algorithm(population_size, indicators):
     population = initial_population(population_size, len(indicators))
+    normalize_indicators(indicators)
     fitness(population, indicators)
 
-    for _ in range(500):
+    for _ in range(1000):
         father, mother = selection(population)
         child = crossing_over(father, mother)
         mutated_child = mutation(child)
