@@ -48,20 +48,6 @@ def variance_38d_6m_1y(interval):
 
 def simulator_setup(number_of_companies, initial_distribution, amount_to_invest):
     banks = []
-    print(initial_distribution)
-    t = sum(initial_distribution)
-    for i, j in enumerate(initial_distribution):
-        initial_distribution[i] = j / t
-    print(sum(initial_distribution))
-    print(initial_distribution)
-    # if(sum(initial_distribution) > 1):
-    #     difference = sum(initial_distribution) - 1
-    #     index = initial_distribution.index(max(initial_distribution))
-    #     initial_distribution[index] -= difference
-    # elif(sum(initial_distribution) < 1):
-    #     difference = 1 - sum(initial_distribution)
-    #     index = initial_distribution.index(max(initial_distribution))
-    #     initial_distribution[index] += difference
     for i in range(number_of_companies):
         banks.append(Bank(amount_to_invest *
                           initial_distribution[i]))

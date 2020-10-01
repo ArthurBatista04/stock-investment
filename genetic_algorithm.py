@@ -23,20 +23,10 @@ def selection(population):
 
 def crossing_over(father, mother):
     required_gene_number = len(father.gene)
-    child_gene = [-1 for _ in range(required_gene_number)]
+    total_sum = sum(father.gene) + sum(mother.gene)
 
-    for i in range(required_gene_number):
-        if(father.gene[i] == mother.gene[i]):
-            child_gene[i] = father.gene[i]
-
-    while(-1 in child_gene):
-        random_position = random.randrange(0, required_gene_number)
-        if(child_gene[random_position] == -1):
-            choice_father_gene = random.randrange(0, 2)
-            if(choice_father_gene):
-                child_gene[random_position] = father.gene[random_position]
-            else:
-                child_gene[random_position] = mother.gene[random_position]
+    child_gene = [(mother.gene[i] + father.gene[i]) /
+                  total_sum for i in range(required_gene_number)]
     return NODE(child_gene)
 
 
